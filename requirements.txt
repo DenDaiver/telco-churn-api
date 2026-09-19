@@ -1,0 +1,5 @@
+flask # Web framework used to build and run the API
+joblib # Used to load the saved model and preprocessor (.pkl files)
+pandas # Used to convert incoming customer data into a DataFrame
+scikit-learn # Required to reconstruct the saved model/preprocessor objects,
+               # even though it's not directly imported in app.py
