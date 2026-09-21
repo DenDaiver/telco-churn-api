@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import joblib
 import pandas as pd
 
@@ -9,7 +9,7 @@ processor = joblib.load('churn_processor.pkl')
 
 @app.route('/')
 def home():
-    return "Telco Churn Prediction API is running."
+    return render_template('index.html)
 
 @app.route('/predict', methods=['POST'])
 def predict():
