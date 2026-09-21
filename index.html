@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Churn Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F7F9;
+    --surface: #FFFFFF;
+    --ink: #1B2430;
+    --muted: #5B6472;
+    --accent: #0F6B5C;
+    --accent-soft: #E4F1EE;
+    --alert: #B54708;
+    --alert-soft: #FBEDE3;
+    --border: #DDE1E6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, Arial, sans-serif;
+    line-height: 1.45;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  header {
+    margin-bottom: 32px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+    max-width: 46ch;
+  }
+
+  form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 28px 28px;
+  }
+
+  fieldset {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+    padding: 22px 0;
+  }
+
+  fieldset:first-of-type {
+    border-top: none;
+  }
+
+  legend {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 0;
+    margin-bottom: 14px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field { display: flex; flex-direction: column; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    font-family: inherit;
+    font-size: 14.5px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 10px;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  button {
+    width: 100%;
+    margin-top: 24px;
+    background: var(--accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 7px;
+    padding: 13px;
+    cursor: pointer;
+    transition: opacity .15s ease;
+  }
+
+  button:hover { opacity: .9; }
+  button:disabled { opacity: .55; cursor: default; }
+
+  #result {
+    margin-top: 20px;
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: none;
+  }
+
+  #result.show { display: block; }
+
+  #result .label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  #result .value {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  #result.churn {
+    background: var(--alert-soft);
+  }
+  #result.churn .value { color: var(--alert); }
+
+  #result.stay {
+    background: var(--accent-soft);
+  }
+  #result.stay .value { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+    form { padding: 4px 18px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag">Retention tool</span>
+    <h1>Will this customer churn?</h1>
+    <p>Enter an account's details below to get a churn prediction from the trained model.</p>
+  </header>
+
+  <form id="churnForm">
+
+    <fieldset>
+      <legend>Account</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Gender</label>
+          <select name="gender"><option>Female</option><option>Male</option></select>
+        </div>
+        <div class="field">
+          <label>Senior citizen</label>
+          <select name="SeniorCitizen"><option value="0">No</option><option value="1">Yes</option></select>
+        </div>
+        <div class="field">
+          <label>Partner</label>
+          <select name="Partner"><option>Yes</option><option>No</option></select>
+        </div>
+        <div class="field">
+          <label>Dependents</label>
+          <select name="Dependents"><option>Yes</option><option>No</option></select>
+        </div>
+        <div class="field">
+          <label>Tenure (months)</label>
+          <input type="number" name="tenure" value="12" required>
+        </div>
+        <div class="field">
+          <label>Contract</label>
+          <select name="Contract">
+            <option>Month-to-month</option><option>One year</option><option>Two year</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Services</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Phone service</label>
+          <select name="PhoneService"><option>Yes</option><option>No</option></select>
+        </div>
+        <div class="field">
+          <label>Multiple lines</label>
+          <select name="MultipleLines"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        <div class="field full">
+          <label>Internet service</label>
+          <select name="InternetService"><option>Fiber optic</option><option>DSL</option><option>No</option></select>
+        </div>
+        <div class="field">
+          <label>Online security</label>
+          <select name="OnlineSecurity"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        <div class="field">
+          <label>Online backup</label>
+          <select name="OnlineBackup"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        <div class="field">
+          <label>Device protection</label>
+          <select name="DeviceProtection"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        <div class="field">
+          <label>Tech support</label>
+          <select name="TechSupport"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        <div class="field">
+          <label>Streaming TV</label>
+          <select name="StreamingTV"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+        <div class="field">
+          <label>Streaming movies</label>
+          <select name="StreamingMovies"><option value="1">Yes</option><option value="0">No</option></select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Billing</legend>
+      <div class="grid">
+        <div class="field">
+          <label>Paperless billing</label>
+          <select name="PaperlessBilling"><option>Yes</option><option>No</option></select>
+        </div>
+        <div class="field">
+          <label>Payment method</label>
+          <select name="PaymentMethod">
+            <option>Electronic check</option>
+            <option>Mailed check</option>
+            <option>Bank transfer (automatic)</option>
+            <option>Credit card (automatic)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Monthly charges ($)</label>
+          <input type="number" step="0.01" name="MonthlyCharges" value="70.5" required>
+        </div>
+        <div class="field">
+          <label>Total charges ($)</label>
+          <input type="number" step="0.01" name="TotalCharges" value="846" required>
+        </div>
+      </div>
+    </fieldset>
+
+    <button type="submit" id="submitBtn">Predict</button>
+  </form>
+
+  <div id="result">
+    <div class="label">Prediction</div>
+    <div class="value" id="resultValue"></div>
+  </div>
+
+</div>
+
+<script>
+function tenureGroup(t) {
+  if (t <= 12) return "0-12";
+  if (t <= 24) return "13-24";
+  if (t <= 36) return "25-36";
+  if (t <= 48) return "37-48";
+  if (t <= 60) return "49-60";
+  return "61-72";
+}
+
+const form = document.getElementById('churnForm');
+const btn = document.getElementById('submitBtn');
+const result = document.getElementById('result');
+const resultValue = document.getElementById('resultValue');
+
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const data = {};
+  formData.forEach((value, key) => data[key] = value);
+
+  data.tenure = parseFloat(data.tenure);
+  data.MonthlyCharges = parseFloat(data.MonthlyCharges);
+  data.TotalCharges = parseFloat(data.TotalCharges);
+  data.SeniorCitizen = parseInt(data.SeniorCitizen);
+  data.MultipleLines = parseInt(data.MultipleLines);
+  data.OnlineSecurity = parseInt(data.OnlineSecurity);
+  data.OnlineBackup = parseInt(data.OnlineBackup);
+  data.DeviceProtection = parseInt(data.DeviceProtection);
+  data.TechSupport = parseInt(data.TechSupport);
+  data.StreamingTV = parseInt(data.StreamingTV);
+  data.StreamingMovies = parseInt(data.StreamingMovies);
+
+  data.num_services = data.OnlineSecurity + data.OnlineBackup + data.DeviceProtection +
+                       data.TechSupport + data.StreamingTV + data.StreamingMovies;
+  data.avg_monthly_spend = data.tenure > 0 ? data.TotalCharges / data.tenure : 0;
+  data.tenure_group = tenureGroup(data.tenure);
+
+  btn.disabled = true;
+  btn.textContent = "Predicting...";
+  result.classList.remove('show', 'churn', 'stay');
+
+  try {
+    const response = await fetch('/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const json = await response.json();
+
+    resultValue.textContent = json.prediction === "Churn"
+      ? "Likely to churn"
+      : "Likely to stay";
+    result.classList.add('show', json.prediction === "Churn" ? 'churn' : 'stay');
+  } catch (err) {
+    resultValue.textContent = "Something went wrong — try again.";
+    result.classList.add('show');
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Predict";
+});
+</script>
+</body>
+</html>
