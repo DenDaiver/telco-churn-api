@@ -9,7 +9,7 @@ processor = joblib.load('churn_processor.pkl')
 
 @app.route('/')
 def home():
-    return render_template('index.html)
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
